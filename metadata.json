@@ -1,0 +1,8 @@
+{
+  "name": "ExamGuide India",
+  "description": "Comprehensive, modern Indian exam portal for government jobs, entrance exams, admit cards, syllabus, and results with real-time tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
