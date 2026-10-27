@@ -55,23 +55,54 @@ function AppContent() {
   const { exams, selectedExam, setSelectedExam, setFilters } = useExam();
   const { user } = useAuth();
 
-  // Handle URL hash changes for deep linking & SEO friendly browsing
+  // Handle URL pathname and hash changes for deep linking & SEO friendly browsing
   useEffect(() => {
-    const handleHashChange = () => {
+    const handleUrlChange = () => {
+      // Check query parameter for direct exam link, e.g. ?exam=upsc-cse-2026
+      const searchParams = new URLSearchParams(window.location.search);
+      const examId = searchParams.get('exam');
+      if (examId && exams.length > 0) {
+        const found = exams.find((e) => e.id === examId);
+        if (found) {
+          setSelectedExam(found);
+        }
+      }
+
+      // Check clean pathname first (e.g. /exams, /syllabus), then fallback to hash
+      const path = window.location.pathname.replace(/^\/+/, '').replace(/\/+$/, '').trim();
       const hash = window.location.hash.replace('#', '').trim();
-      if (hash && VALID_VIEWS.includes(hash)) {
-        setCurrentView(hash);
+
+      const targetView = VALID_VIEWS.includes(path) ? path : (VALID_VIEWS.includes(hash) ? hash : '');
+
+      if (targetView) {
+        setCurrentView(targetView);
+        if (targetView === 'gov-jobs') {
+          setFilters((prev) => ({ ...prev, category: 'government' }));
+        } else if (targetView === 'entrance') {
+          setFilters((prev) => ({ ...prev, category: 'entrance' }));
+        } else if (targetView === 'university') {
+          setFilters((prev) => ({ ...prev, category: 'university' }));
+        } else if (targetView === 'exams') {
+          setFilters((prev) => ({ ...prev, category: 'all' }));
+        }
       }
     };
 
-    handleHashChange();
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+    handleUrlChange();
+    window.addEventListener('hashchange', handleUrlChange);
+    window.addEventListener('popstate', handleUrlChange);
+    return () => {
+      window.removeEventListener('hashchange', handleUrlChange);
+      window.removeEventListener('popstate', handleUrlChange);
+    };
+  }, [exams, setFilters, setSelectedExam]);
 
   const handleNavigate = (view: string) => {
     setCurrentView(view);
-    window.location.hash = view;
+    const newPath = view === 'home' ? '/' : `/${view}`;
+    if (window.location.pathname !== newPath) {
+      window.history.pushState({}, '', newPath);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // Apply view specific presets if needed

@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /saved
+Disallow: /dashboard
 
-Sitemap: https://examguideindia.in/sitemap.xml
+Sitemap: https://exam-guide-india.bharat-internship-portal.workers.dev/sitemap.xml
